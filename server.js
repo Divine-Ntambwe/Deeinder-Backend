@@ -183,10 +183,10 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
         aboutMe: {},
         likes: [],
         connections: 0,
-        picsPath: [],
+        picsPaths: [],
         profileStatus: true,
       });
-    res.status(200).json({ message: "successfully signed up",fullName, username, email,gender });
+    res.status(200).json({ message: "successfully signed up",email, password, username,gender,fullName });
   } catch (error) {
     console.error("Error signing user up", error);
     res.status(status).send({ error: message });
