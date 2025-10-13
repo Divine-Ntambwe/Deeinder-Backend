@@ -15,7 +15,7 @@ const server = http.createServer(app);
 const io = new Server (
   server,{
   cors:{
-    origin: "https://deeinder-backend.onrender.com"
+    origin: "https://deeinder-frontend.vercel.app"
   }
 }
 )
