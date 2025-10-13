@@ -15,7 +15,7 @@ const server = http.createServer(app);
 const io = new Server (
   server,{
   cors:{
-    origin: "http://localhost:3000"
+    origin: "https://deeinder-backend.onrender.com"
   }
 }
 )
@@ -211,7 +211,6 @@ app.post("/login", async (req, res) => {
       invalid("Please enter email and password");
       throw new Error("Please enter email and password");
     }
-    console.log(await membersCol.find({}).toArray())
 
     const user = await membersCol.findOne(
       { email },
