@@ -39,7 +39,8 @@ const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
 const { send } = require("process");
-const {v2:cloudinary} = require("cloudinary")
+const {v2:cloudinary} = require("cloudinary");
+const { error } = require("console");
 
 
 // const storage = multer.memoryStorage(
@@ -71,16 +72,22 @@ async function connectToMongo() {
   console.log("Connected to mongodb");
 }
 
-async function basicAUth(req, res, next) {
+async function basicAuth(req, res, next) {
+  try{
+
+  
   const authHeader = req.headers.authorization;
+  
 
   if (!authHeader || !authHeader.startsWith("basic ")) {
-    return res
-      .status(401)
-      .json({ message: "Authorization header missing or invalid" });
+    res
+    .status(401)
+    .json({ message: "Authorization header missing or invalid" });
+    throw Error("Authorization header missing or invalid")
   }
 
   const base64Credentials = authHeader.split(" ")[1];
+  
   const credentials = base64.decode(base64Credentials).split(":");
   const email = credentials[0];
   const password = credentials[1];
@@ -89,18 +96,22 @@ async function basicAUth(req, res, next) {
   const user = await usersDb.findOne({ email });
 
   if (!user) {
-    return res.status(401).json({ message: "User not found" });
+    res.status(401).json({ message: "User not found" });
+    throw new Error("User not found")
   }
 
-  const decodedPW = base64.decode(user.password);
-
-  if (decodedPW !== password) {
-    return res.status(401).json({ message: "Incorrect Password" });
+ 
+  if (user.password !== password) {
+    res.status(401).json({ message: "Incorrect Password" });
+    throw new Error("Incorrect Password");
   }
   req.user = user;
 
   res.status(200);
   next();
+}catch(e){
+  console.error("Error Basic Authorization",e)
+}
 }
 
 //signing up
@@ -240,16 +251,14 @@ app.post("/login", async (req, res) => {
       invalid("Incorrect password");
       throw new Error("Incorrect password");
     }
-
-    delete user.password
-    res.status(200).json({ message: "successfully signed in", ...user });
+    res.status(200).json({ ...user });
   } catch (error) {
     console.error("Error logging user in", error);
     res.status(status).json({ error: message });
   }
 });
 
-// app.use(basicAUth);
+app.use(basicAuth);
 app.post("/UploadPfp", upload.single("pfp"), async (req, res) => {
   res.status(200).json(req.file);
 });
@@ -622,10 +631,10 @@ app.post("/sendAMessage",async (req, res) => {
     const username = req.params.username;
     const result = await db.collection("messages").insertOne(req.body)
 
-    res.send(200)
+    res.send(200).json({message:"successsfully sent"})
   }catch(error){
-    console.error("Error sending messages", error);
-    res.status(500).send({ message: "Internal server error" });
+    console.error("Error sending messages", error); 
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
