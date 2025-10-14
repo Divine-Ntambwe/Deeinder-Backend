@@ -43,17 +43,24 @@ const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
 const { send } = require("process");
+const {v2:cloudinary} = require("cloudinary")
 
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(null, uuidv4() + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+// const storage = multer.memoryStorage(
+//   // destination: (req, file, cb) => {
+//   //   cb(null, "uploads");
+//   // },
+//   // filename: (req, file, cb) => {
+//   //   cb(null, uuidv4() + file.originalname);
+//   // },
+// );
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+})
+const upload = multer({ storage: multer.memoryStorage() });
 app.use("/uploads", express.static("uploads"));
 
 app.use(cors());
@@ -165,13 +172,18 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
     let age = today.getFullYear() - dob.getFullYear();
     age = dob.setFullYear(today.getFullYear()) > today ? age - 1 : age;
 
-    const pfpPath = req.file.path;
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const pfpPath = await cloudinary.uploader.upload(dataURI);
+
     const result = await membersInfoCol.insertOne({
       ...memDetails,
       age,
-      pfpPath,
+      pfpPath:pfpPath.secure_url,
       profileStatus: true,
     });
+    
+
     const result2 = await db
       .collection("membersProfile")
       .insertOne({
@@ -418,8 +430,11 @@ app.put("/UpdatemembersPersonalInfo/:username",upload.single("pfp"), async (req,
     }
 
     if (req.file){
-     
-      const newPfpResult = await db.collection("membersPersonalInfo").updateOne({username},{$set:{pfpPath:req.file.path}})
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const pfpPath = await cloudinary.uploader.upload(dataURI);
+
+      const newPfpResult = await db.collection("membersPersonalInfo").updateOne({username},{$set:{pfpPath:pfpPath.secure_url}})
       if (!newPfpResult.modifiedCount){
         throw new Error("Could not update profile pic");
       }
@@ -447,7 +462,12 @@ app.put("/UpdatemembersPersonalInfo/:username",upload.single("pfp"), async (req,
 
 app.put("/addPictures/:username",upload.single("picture"),async (req,res)=>{
 try {
-  const result = await db.collection("membersProfile").updateOne({username:req.params.username},{$push:{picsPaths: req.file.path}})
+  const b64 = req.file.buffer.toString("base64");
+  const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+  const pfpPath = await cloudinary.uploader.upload(dataURI);
+  
+
+  const result = await db.collection("membersProfile").updateOne({username:req.params.username},{$push:{picsPaths: pfpPath.secure_url}})
   if(result.modifiedCount){
     res.status(200).json({message:"successfully updated"})
   }else{
@@ -461,8 +481,7 @@ res.status(500).json({ error: "Internal server error" });
 
 app.put("/removePicture/:username",async (req,res)=>{
 try {
-  const path = (req.body.path).slice((req.body.path).indexOf("uploads"),(req.body.path).length);
-
+  const path = req.body.path
   const result = await db.collection("membersProfile").updateOne({username:req.params.username},{$pull:{picsPaths: path}});
 
   
@@ -471,12 +490,6 @@ try {
   }else{
     throw new Error("couldn't remove picture")
   }
-
-  fs.unlink(path, (err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete file' });
-    }
-  });
 
 
 }catch(error){
