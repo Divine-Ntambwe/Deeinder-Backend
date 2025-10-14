@@ -23,15 +23,11 @@ const io = new Server (
 io.on("connection",(socket)=>{
   socket.on("join_room",(data)=>{
     socket.join(data)
-    console.log(data)
   })
 
   socket.on("send_message",(data)=>{
     socket.to(data.room).emit("recieve_message",data)
-    console.log(data)
   })
-
-
 
   socket.on("disconnect",()=>{
     // console.log("User disconnected",socket.id)
@@ -121,6 +117,14 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
     let { fullName, username, email, password, confirmPassword, gender, dob } =
       memDetails;
 
+    if (!req.file){
+      invalid("Please upload a profile picture");
+      throw new Error("Please upload a profile picture");
+    }  
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const pfpPath = await cloudinary.uploader.upload(dataURI);  
+
     if (!email.indexOf("@")) {
       invalid("Invalid email");
       throw new Error("Invalid email");
@@ -172,9 +176,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
     let age = today.getFullYear() - dob.getFullYear();
     age = dob.setFullYear(today.getFullYear()) > today ? age - 1 : age;
 
-    const b64 = req.file.buffer.toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-    const pfpPath = await cloudinary.uploader.upload(dataURI);
+    
 
     const result = await membersInfoCol.insertOne({
       ...memDetails,
