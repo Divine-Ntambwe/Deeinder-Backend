@@ -81,7 +81,7 @@ async function basicAuth(req, res, next) {
 
   if (!authHeader || !authHeader.startsWith("basic ")) {
     res
-    .status(401)
+    .status(404)
     .json({ message: "Authorization header missing or invalid" });
     throw Error("Authorization header missing or invalid")
   }
@@ -96,13 +96,13 @@ async function basicAuth(req, res, next) {
   const user = await usersDb.findOne({ email });
 
   if (!user) {
-    res.status(401).json({ message: "User not found" });
+    res.status(404).json({ message: "User not found" });
     throw new Error("User not found")
   }
 
  
   if (user.password !== password) {
-    res.status(401).json({ message: "Incorrect Password" });
+    res.status(404).json({ message: "Incorrect Password" });
     throw new Error("Incorrect Password");
   }
   req.user = user;
