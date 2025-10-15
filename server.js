@@ -81,7 +81,7 @@ async function basicAuth(req, res, next) {
 
   if (!authHeader || !authHeader.startsWith("basic ")) {
     res
-    .status(404)
+    .status(401)
     .json({ message: "Authorization header missing or invalid" });
     throw Error("Authorization header missing or invalid")
   }
@@ -96,13 +96,13 @@ async function basicAuth(req, res, next) {
   const user = await usersDb.findOne({ email });
 
   if (!user) {
-    res.status(404).json({ message: "User not found" });
+    res.status(401).json({ message: "User not found" });
     throw new Error("User not found")
   }
 
  
   if (user.password !== password) {
-    res.status(404).json({ message: "Incorrect Password" });
+    res.status(401).json({ message: "Incorrect Password" });
     throw new Error("Incorrect Password");
   }
   req.user = user;
@@ -119,7 +119,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
   let status = 500;
   let message = "Internal server error";
   const invalid = (m) => {
-    status = 401;
+    status = 400;
     message = m;
   };
   try {
@@ -223,7 +223,7 @@ app.post("/login", async (req, res) => {
   let status = 500;
   let message = "Internal server error";
   const invalid = (m) => {
-    status = 401;
+    status = 400;
     message = m;
   };
 
@@ -307,7 +307,7 @@ app.get("/memberProfile/:username", async (req, res) => {
   let status = 500;
   let message = "Internal server error";
   const invalid = () => {
-    status = 401;
+    status = 400;
     message = "user does not exist";
   };
 
@@ -342,7 +342,7 @@ app.post(
     let status = 500;
     let message = "Internal server error";
     const invalid = () => {
-      status = 401;
+      status = 400;
       message = "user does not exist";
     };
     try {
@@ -423,7 +423,7 @@ app.put("/UpdatemembersPersonalInfo/:username",upload.single("pfp"), async (req,
   let status = 500;
   let message = "Internal server error";
   const invalid = () => {
-    status = 401;
+    status = 400;
     message = "Invalid input";
   };
   try {
