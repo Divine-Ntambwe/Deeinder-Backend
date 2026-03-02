@@ -4,6 +4,7 @@ on:
   #runs every 5mins
   # 'min hour dayOfMonth month day'
     - cron: '*/5 * * * *'
+  workflow_dispatch:
 jobs:
   restore:
     runs-on: self-hosted
