@@ -26,9 +26,6 @@ jobs:
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
         run: 
-          mongorestore --uri="$MONGO_URI" --db mydb --drop dump/mydb
-      
-          
-        
+          mongorestore --uri="$MONGO_URI" --db DeeinderBackup1 --drop dump/Deeinder
       
     
