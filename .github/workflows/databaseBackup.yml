@@ -15,7 +15,11 @@ jobs:
       - name: Install MongoDB database tools
         run:
           wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.9.0.tgz
+      - name: Extract files
+        run:
           tar -xvzf mongodb-database-tools-*.tgz
+      - name: make executibles global
+        run:
           sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
       - name: Run backup
         env:
