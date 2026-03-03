@@ -22,11 +22,11 @@ jobs:
       - name: check
         run: ls
       - name: go to folder
-        run: cd workspaces/testFolder
+        run: cd testFolder
       - name: Run backup
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
         run: 
-          mongorestore --uri="$MONGO_URI" --db DeeinderBackup1 --drop dump/Deeinder
+          mongorestore --uri="$MONGO_URI" --db DeeinderTestDB --drop dump/Deeinder
       
     
