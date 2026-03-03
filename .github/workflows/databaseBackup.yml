@@ -10,9 +10,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    #clones repository into the virtual machine the github code will
-      - name: Checkout repository
-        uses: actions/checkout@v3
       - name: Install MongoDB database tools
         run:
           wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.9.0.tgz
