@@ -27,6 +27,6 @@ jobs:
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
         run: 
-          mongorestore --uri="$MONGO_URI" --nsInclude=DeeinderTestDB.* dump/Deeinder
+          mongorestore --uri="$MONGO_URI" --db DeeinderTestDB  dump/Deeinder
       
     
