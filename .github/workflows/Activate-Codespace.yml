@@ -19,3 +19,8 @@ jobs:
               GH_TOKEN: ${{ secrets.CODESPACES_TOKEN }}
         run: |
           gh api -X POST /user/codespaces/orange-space-engine-q76vr79xjgqgh9r97/start
+      - name: start actions listener
+        run: |
+          cd workspaces/actions-runner
+          ./run.sh
+          
