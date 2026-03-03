@@ -16,6 +16,6 @@ jobs:
 
       - name: Resume Codespace via API
         env:
-              CODESPACES_TOKEN: ${{ secrets.CODESPACES_TOKEN }}
+              GH_TOKEN: ${{ secrets.CODESPACES_TOKEN }}
         run: |
           gh api -X POST /user/codespaces/TestCodespace/start
