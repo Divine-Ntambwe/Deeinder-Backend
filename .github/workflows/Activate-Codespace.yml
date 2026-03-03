@@ -18,4 +18,4 @@ jobs:
         env:
               CODESPACES_TOKEN: ${{ secrets.CODESPACES_TOKEN }}
         run: |
-          gh api -X POST /user/codespaces/Test Codespace/start
+          gh api -X POST /user/codespaces/TestCodespace/start
