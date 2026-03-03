@@ -21,6 +21,9 @@ jobs:
           gh api -X POST /user/codespaces/orange-space-engine-q76vr79xjgqgh9r97/start
       - name: start actions listener
         run: |
+          ls
+          cd /
+          ls
           cd workspaces/actions-runner
           ./run.sh
           
