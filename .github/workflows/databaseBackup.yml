@@ -25,7 +25,7 @@ jobs:
       - name: go to root
         run: cd /
       - name: go to folder
-        run: cd workspaces/testfolder
+        run: cd workspaces/testFolder
       - name: Run backup
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
