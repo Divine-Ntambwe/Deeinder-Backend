@@ -22,8 +22,6 @@ jobs:
       - name: make executibles global
         run:
           sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
-      - name: go to root
-        run: cd /
       - name: check
         run: ls
       - name: go to folder
