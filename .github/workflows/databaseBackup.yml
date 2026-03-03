@@ -19,14 +19,14 @@ jobs:
       - name: make executibles global
         run:
           sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
-      - name: check
-        run: ls
       - name: go to folder
         run: cd testFolder
+      - name: check
+        run: ls
       - name: Run backup
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
         run: 
-          mongorestore --uri="$MONGO_URI" --db DeeinderTestDB --drop dump/Deeinder
+          mongorestore --uri="$MONGO_URI" --nsInclude=DeeinderTestDB.* dump/Deeinder
       
     
