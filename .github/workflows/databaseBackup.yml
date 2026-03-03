@@ -22,6 +22,10 @@ jobs:
       - name: make executibles global
         run:
           sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
+      - name: go to root
+        run: cd /
+      - name: go to folder
+        run: cd workspaces/testfolder
       - name: Run backup
         env:
           MONGO_URI: ${{ secrets.MONGO_URI}}
