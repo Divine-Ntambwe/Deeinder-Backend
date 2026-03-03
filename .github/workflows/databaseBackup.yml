@@ -1,10 +1,10 @@
 name: "Trigger database backup action on CRON schedule"
 on:
   schedule:
+    - cron: '0 1 * * *'
   workflow_dispatch:
   #runs every 5mins
   # 'min hour dayOfMonth month day'
-    # - cron: '*/5 * * * *'
 jobs:
   restore:
     runs-on: self-hosted
