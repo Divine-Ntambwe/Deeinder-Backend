@@ -23,7 +23,9 @@ jobs:
         run:
           sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
       - name: go to root
-        run: cd /
+        run: cd 
+      - name: check
+        run: ls
       - name: go to folder
         run: cd workspaces/testFolder
       - name: Run backup
