@@ -7,7 +7,7 @@ const base64 = require("base-64");
 const port = process.env.port || 8000;
 const uri = process.env.MONGODB_DEEINDER;
 const cors = require("cors");
-
+const supabase = require('./supabase_db.js');
 
 const http = require("http");
 const {Server} = require("socket.io");
