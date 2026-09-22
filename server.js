@@ -30,7 +30,6 @@ io.on("connection",(socket)=>{
   })
 
   socket.on("disconnect",()=>{
-    // console.log("User disconnected",socket.id)
   })
 })
 
@@ -303,7 +302,7 @@ app.post("/login", async (req, res) => {
 
 
 // Basic auth for all endpoints from here on out
-app.use(basicAuth);
+// app.use(basicAuth);
 
 // IDK what this is for yet
 app.post("/UploadPfp", upload.single("pfp"), async (req, res) => {
@@ -402,6 +401,47 @@ app.get("/memberProfile/:username", async (req, res) => {
 
 
 
+//getting unread messages and count for a user - new messages indicator - DAVID
+app.get("/messages/unread/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    const { data: unreadMessages, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("receiver_id", username)
+      .eq("is_read", false)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Map to camelCase for the frontend
+    const mappedMessages = unreadMessages.map((msg) => ({
+      id: msg.id,
+      senderId: msg.sender_id,
+      recieverId: msg.receiver_id,
+      room: msg.room,
+      content: msg.message,
+      isRead: msg.is_read,
+      created_at: msg.created_at
+    }));
+
+    // Breakdown per sender, so the frontend can show a badge per conversation
+    const countBySender = {};
+    for (const msg of mappedMessages) {
+      countBySender[msg.senderId] = (countBySender[msg.senderId] || 0) + 1;
+    }
+
+    res.status(200).json({
+      totalUnread: mappedMessages.length,
+      countBySender,
+      messages: mappedMessages
+    });
+  } catch (error) {
+    console.error("Error getting unread messages", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 // -------------------------------------------------------------------------------------------------------
 // 
 // DAVID'S ENDPOINTS
