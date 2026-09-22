@@ -7,7 +7,7 @@ const base64 = require("base-64");
 const port = process.env.port || 8000;
 const uri = process.env.MONGODB_DEEINDER;
 const cors = require("cors");
-const supabase = require("./supabase_db.js");
+const supabase = require('./supabase_db.js');
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -27,10 +27,9 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("recieve_message", data);
   });
 
-  socket.on("disconnect", () => {
-    // console.log("User disconnected",socket.id)
-  });
-});
+  socket.on("disconnect",()=>{
+  })
+})
 
 const multer = require("multer");
 const path = require("path");
@@ -169,14 +168,6 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
       throw new Error("Please upload a profile picture");
     }
 
-    // ─── CALL THE EXTERNAL CLOUD AI SERVICE ───────────────────────────
-    const faceCheck = await verifyProfilePicture(req.file.buffer);
-    if (!faceCheck.isValid) {
-      invalid(faceCheck.message);
-      throw new Error(faceCheck.message);
-    }
-    // ───────────────────────────────────────────────────────────────────
-
     const b64 = req.file.buffer.toString("base64");
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
     const pfpPath = await cloudinary.uploader.upload(dataURI);
@@ -204,9 +195,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
       password.match(/([\W]|_)/g) == null
     ) {
       invalid("Password should include numbers and letters and symbols");
-      throw new Error(
-        "Password should include numbers and letters and symbols"
-      );
+      throw new Error("Password should include numbers and letters and symbols");
     }
 
     if (password !== confirmPassword) {
@@ -262,7 +251,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
         dob: dob.toISOString().split("T")[0],
         age: age,
         pfp_path: pfpPath.secure_url,
-        profile_status: true,
+        profile_status: true
       })
       .select()
       .single();
@@ -280,7 +269,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
         likes: [],
         connections_count: 0,
         pics_paths: [],
-        profile_status: true,
+        profile_status: true
       });
     if (profileError) throw profileError;
 
@@ -289,7 +278,7 @@ app.post("/signUp", upload.single("pfp"), async (req, res) => {
       email,
       username,
       gender,
-      fullName,
+      fullName
     });
   } catch (error) {
     console.error("Error signing user up", error);
@@ -316,9 +305,7 @@ app.post("/login", async (req, res) => {
 
     const { data: user, error } = await supabase
       .from("membersPersonalInfo")
-      .select(
-        "id, email, password, user_name, gender, full_name, age, pfp_path"
-      )
+      .select("id, email, password, user_name, gender, full_name, age, pfp_path")
       .eq("email", email)
       .maybeSingle();
     if (error) throw error;
@@ -341,7 +328,7 @@ app.post("/login", async (req, res) => {
       gender: user.gender,
       fullName: user.full_name,
       age: user.age,
-      pfpPath: user.pfp_path,
+      pfpPath: user.pfp_path
     });
   } catch (error) {
     console.error("Error logging user in", error);
@@ -349,8 +336,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
 // Basic auth for all endpoints from here on out
-app.use(basicAuth);
+// app.use(basicAuth);
 
 // IDK what this is for yet
 app.post("/UploadPfp", upload.single("pfp"), async (req, res) => {
@@ -386,7 +374,7 @@ app.get("/membersProfiles", async (req, res) => {
         aboutMe: profile.about_me ?? {},
         likes: profile.likes ?? [],
         connections: profile.connections_count ?? 0,
-        picsPaths: profile.pics_paths ?? [],
+        picsPaths: profile.pics_paths ?? []
       };
     });
 
@@ -439,7 +427,7 @@ app.get("/memberProfile/:username", async (req, res) => {
       aboutMe: profile?.about_me ?? {},
       likes: profile?.likes ?? [],
       connections: profile?.connections_count ?? 0,
-      picsPaths: profile?.pics_paths ?? [],
+      picsPaths: profile?.pics_paths ?? []
     });
   } catch (error) {
     console.error("Error getting profile", error);
@@ -447,8 +435,51 @@ app.get("/memberProfile/:username", async (req, res) => {
   }
 });
 
+
+
+//getting unread messages and count for a user - new messages indicator - daniella wirked on
+app.get("/messages/unread/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    const { data: unreadMessages, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("receiver_id", username)
+      .eq("is_read", false)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Map to camelCase for the frontend
+    const mappedMessages = unreadMessages.map((msg) => ({
+      id: msg.id,
+      senderId: msg.sender_id,
+      recieverId: msg.receiver_id,
+      room: msg.room,
+      content: msg.message,
+      isRead: msg.is_read,
+      created_at: msg.created_at
+    }));
+
+    // Breakdown per sender, so the frontend can show a badge per conversation
+    const countBySender = {};
+    for (const msg of mappedMessages) {
+      countBySender[msg.senderId] = (countBySender[msg.senderId] || 0) + 1;
+    }
+
+    res.status(200).json({
+      totalUnread: mappedMessages.length,
+      countBySender,
+      messages: mappedMessages
+    });
+  } catch (error) {
+    console.error("Error getting unread messages", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 // -------------------------------------------------------------------------------------------------------
-//
+// 
 // DAVID'S ENDPOINTS
 //
 //--------------------------------------------------------------------------------------------------------
