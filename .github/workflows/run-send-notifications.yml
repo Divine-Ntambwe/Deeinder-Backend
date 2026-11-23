@@ -2,7 +2,7 @@ name: Run scheduled job to send notifications for events
 
 on:
   schedule:
-    - cron: "35 14 * * *"   # every day at 00:45 UTC (08:00 in Johannesburg)
+    - cron: "15 6 * * *"   # every day at 00:45 UTC (08:00 in Johannesburg)
   workflow_dispatch:       # lets you trigger it manually from the Actions tab
 
 jobs:
